@@ -8,8 +8,6 @@ interface MarketCardProps {
 }
 
 export function MarketCard({ market }: MarketCardProps) {
-  const primaryOutcome = market.parsedOutcomes[0];
-
   return (
     <Link to="/markets/$marketId" params={{ marketId: market.id }}>
       <Card className="h-full transition-shadow hover:shadow-md cursor-pointer">
