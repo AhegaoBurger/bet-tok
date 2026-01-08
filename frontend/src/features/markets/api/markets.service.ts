@@ -27,12 +27,16 @@ export const MarketsService = {
     limit?: number;
     offset?: number;
     active?: boolean;
+    order?: string;
+    ascending?: boolean;
   }): Promise<ParsedMarket[]> {
     const response = await apiClient.get<MarketsResponse>("/markets", {
       params: {
         limit: params?.limit?.toString(),
         offset: params?.offset?.toString(),
         active: params?.active?.toString(),
+        order: params?.order,
+        ascending: params?.ascending?.toString(),
       },
     });
 

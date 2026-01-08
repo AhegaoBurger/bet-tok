@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.6",
     "@tanstack/react-query": "^5.87.1",
     "@tanstack/react-router": "^1.131.27",
     "axios": "^1.7.7",

@@ -1,13 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { MarketsService } from "./markets.service";
 import { QUERY_STALE_TIME } from "@/shared/constants";
+import type { MarketSortField } from "../types/market.types";
 
 // Query key factory
 export const marketKeys = {
   all: ["markets"] as const,
   lists: () => [...marketKeys.all, "list"] as const,
-  list: (filters?: { limit?: number; offset?: number; active?: boolean }) =>
-    [...marketKeys.lists(), filters] as const,
+  list: (filters?: {
+    limit?: number;
+    offset?: number;
+    active?: boolean;
+    order?: MarketSortField;
+    ascending?: boolean;
+  }) => [...marketKeys.lists(), filters] as const,
+  infinite: (filters?: {
+    order?: MarketSortField;
+    ascending?: boolean;
+    active?: boolean;
+  }) => [...marketKeys.all, "infinite", filters] as const,
   details: () => [...marketKeys.all, "detail"] as const,
   detail: (id: string) => [...marketKeys.details(), id] as const,
   search: (query: string) => [...marketKeys.all, "search", query] as const,
@@ -17,15 +28,64 @@ export interface UseMarketsOptions {
   limit?: number;
   offset?: number;
   active?: boolean;
+  order?: MarketSortField;
+  ascending?: boolean;
   enabled?: boolean;
 }
 
 export function useMarkets(options?: UseMarketsOptions) {
-  const { limit = 20, offset = 0, active = true, enabled = true } = options || {};
+  const {
+    limit = 20,
+    offset = 0,
+    active = true,
+    order,
+    ascending,
+    enabled = true,
+  } = options || {};
 
   return useQuery({
-    queryKey: marketKeys.list({ limit, offset, active }),
-    queryFn: () => MarketsService.getMarkets({ limit, offset, active }),
+    queryKey: marketKeys.list({ limit, offset, active, order, ascending }),
+    queryFn: () =>
+      MarketsService.getMarkets({ limit, offset, active, order, ascending }),
+    staleTime: QUERY_STALE_TIME,
+    enabled,
+  });
+}
+
+export interface UseInfiniteMarketsOptions {
+  pageSize?: number;
+  active?: boolean;
+  order?: MarketSortField;
+  ascending?: boolean;
+  enabled?: boolean;
+}
+
+export function useInfiniteMarkets(options?: UseInfiniteMarketsOptions) {
+  const {
+    pageSize = 30,
+    active = true,
+    order = "volume",
+    ascending = false,
+    enabled = true,
+  } = options || {};
+
+  return useInfiniteQuery({
+    queryKey: marketKeys.infinite({ order, ascending, active }),
+    queryFn: ({ pageParam = 0 }) =>
+      MarketsService.getMarkets({
+        limit: pageSize,
+        offset: pageParam,
+        active,
+        order,
+        ascending,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < pageSize) {
+        return undefined;
+      }
+      return allPages.flat().length;
+    },
     staleTime: QUERY_STALE_TIME,
     enabled,
   });

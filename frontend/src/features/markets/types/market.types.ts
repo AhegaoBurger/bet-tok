@@ -41,3 +41,22 @@ export interface MarketsResponse {
 export interface MarketResponse {
   data: Market;
 }
+
+// Sort types
+export type MarketSortField = "volume" | "volume24hr" | "liquidity" | "createdAt" | "endDate";
+
+export interface MarketSortOption {
+  label: string;
+  value: MarketSortField;
+  ascending: boolean;
+}
+
+export const MARKET_SORT_OPTIONS: MarketSortOption[] = [
+  { label: "Volume (High to Low)", value: "volume", ascending: false },
+  { label: "24h Volume", value: "volume24hr", ascending: false },
+  { label: "Liquidity", value: "liquidity", ascending: false },
+  { label: "Newest First", value: "createdAt", ascending: false },
+  { label: "Ending Soon", value: "endDate", ascending: true },
+];
+
+export const DEFAULT_SORT: MarketSortOption = MARKET_SORT_OPTIONS[0];
