@@ -59,24 +59,38 @@ Routes are defined in `frontend/src/routes/`. TanStack Router auto-generates the
 
 - **Backend API routes**: `backend/src/routes/polymarket.ts`
 - **Gamma API client**: `backend/src/lib/polymarket-client.ts`
+- **Event types**: `frontend/src/features/events/types/event.types.ts`
+- **Event service**: `frontend/src/features/events/api/events.service.ts`
+- **Event React Query hooks**: `frontend/src/features/events/api/events.queries.ts`
 - **Market types**: `frontend/src/features/markets/types/market.types.ts`
-- **API service**: `frontend/src/features/markets/api/markets.service.ts`
-- **React Query hooks**: `frontend/src/features/markets/api/markets.queries.ts`
+- **Market service**: `frontend/src/features/markets/api/markets.service.ts`
+- **Market React Query hooks**: `frontend/src/features/markets/api/markets.queries.ts`
 - **Shared utilities**: `frontend/src/lib/utils.ts` (formatCurrency, formatPercentage, cn)
 - **API client config**: `frontend/src/lib/api-client.ts`
 - **shadcn components**: `frontend/src/components/ui/`
 
 ## Backend API Endpoints
 
-- `GET /api/markets` - List markets (params: limit, offset, active, closed)
+- `GET /api/markets` - List markets (params: limit, offset, active, closed, order, ascending)
 - `GET /api/markets/:id` - Get market by ID
 - `GET /api/markets/search?q=query` - Search markets
-- `GET /api/events` - List events
+- `GET /api/events` - List events (params: limit, offset, active, closed, order, ascending)
 - `GET /api/events/:id` - Get event by ID
 - `GET /health` - Health check
 
+### Sorting Parameters
+- `order` - Field to sort by: `volume`, `liquidity`, `createdAt`, `endDate` (events use `creationDate`)
+- `ascending` - Sort direction: `true` for ascending, `false` for descending (default)
+
 ## Data Model Notes
 
+### Events vs Markets
+- **Events** are containers for multiple related markets (e.g., "Super Bowl Champion 2025" with 30+ team markets)
+- **Markets** are individual binary prediction markets (Yes/No outcomes)
+- The main page displays **events** sorted by volume to show high-volume prediction markets like Polymarket's homepage
+- Events have aggregated `topOutcomes` (top 5 outcomes sorted by probability) for card preview display
+
+### Parsing
 Market data from Gamma API includes `outcomes` and `outcomePrices` as JSON strings. The service layer parses these into `parsedOutcomes` array with `{ name: string, price: number }` objects. Prices are decimals (0-1) representing probabilities.
 
 ## Adding New Features
@@ -117,15 +131,18 @@ npm run test:coverage # Run with coverage report
 
 **Frontend tests:**
 - `src/lib/__tests__/utils.test.ts` - Utility function tests
-- `src/features/markets/api/__tests__/markets.service.test.ts` - Service layer tests
-- `src/features/markets/api/__tests__/markets.queries.test.tsx` - React Query hook tests
+- `src/features/events/api/__tests__/events.service.test.ts` - Events service layer tests
+- `src/features/events/api/__tests__/events.queries.test.tsx` - Events React Query hook tests
+- `src/features/markets/api/__tests__/markets.service.test.ts` - Markets service layer tests
+- `src/features/markets/api/__tests__/markets.queries.test.tsx` - Markets React Query hook tests
 - `src/shared/hooks/__tests__/useMediaQuery.test.ts` - Media query hook tests
 
 **Frontend test infrastructure:**
 - `src/test/setup.ts` - Global test setup with jest-dom and MSW
 - `src/test/mocks/server.ts` - MSW server configuration
 - `src/test/mocks/handlers.ts` - API mock handlers
-- `src/test/mocks/data/markets.ts` - Mock data fixtures
+- `src/test/mocks/data/markets.ts` - Mock market data fixtures
+- `src/test/mocks/data/events.ts` - Mock event data fixtures
 
 ### Diagnosing Issues
 

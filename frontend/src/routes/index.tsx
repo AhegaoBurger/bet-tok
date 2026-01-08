@@ -20,9 +20,9 @@ function HomePage() {
           and stay informed on world events.
         </p>
         <div className="flex justify-center gap-4">
-          <Link to="/markets">
+          <Link to="/events">
             <Button size="lg">
-              Browse Markets
+              Browse Events
             </Button>
           </Link>
           <Link to="/about">

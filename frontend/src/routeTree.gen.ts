@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketsIndexRouteImport } from './routes/markets/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets/$marketId'
+import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
@@ -29,43 +31,80 @@ const MarketsIndexRoute = MarketsIndexRouteImport.update({
   path: '/markets/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketsMarketIdRoute = MarketsMarketIdRouteImport.update({
   id: '/markets/$marketId',
   path: '/markets/$marketId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsEventIdRoute = EventsEventIdRouteImport.update({
+  id: '/events/$eventId',
+  path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
+  '/events': typeof EventsIndexRoute
   '/markets': typeof MarketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
+  '/events': typeof EventsIndexRoute
   '/markets': typeof MarketsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
+  '/events/': typeof EventsIndexRoute
   '/markets/': typeof MarketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/markets/$marketId' | '/markets'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/events/$eventId'
+    | '/markets/$marketId'
+    | '/events'
+    | '/markets'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/markets/$marketId' | '/markets'
-  id: '__root__' | '/' | '/about' | '/markets/$marketId' | '/markets/'
+  to:
+    | '/'
+    | '/about'
+    | '/events/$eventId'
+    | '/markets/$marketId'
+    | '/events'
+    | '/markets'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/events/$eventId'
+    | '/markets/$marketId'
+    | '/events/'
+    | '/markets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  EventsEventIdRoute: typeof EventsEventIdRoute
   MarketsMarketIdRoute: typeof MarketsMarketIdRoute
+  EventsIndexRoute: typeof EventsIndexRoute
   MarketsIndexRoute: typeof MarketsIndexRoute
 }
 
@@ -92,11 +131,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/markets/$marketId': {
       id: '/markets/$marketId'
       path: '/markets/$marketId'
       fullPath: '/markets/$marketId'
       preLoaderRoute: typeof MarketsMarketIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$eventId': {
+      id: '/events/$eventId'
+      path: '/events/$eventId'
+      fullPath: '/events/$eventId'
+      preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -105,7 +158,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  EventsEventIdRoute: EventsEventIdRoute,
   MarketsMarketIdRoute: MarketsMarketIdRoute,
+  EventsIndexRoute: EventsIndexRoute,
   MarketsIndexRoute: MarketsIndexRoute,
 }
 export const routeTree = rootRouteImport
