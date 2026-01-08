@@ -161,6 +161,12 @@ Vercel
 - `PRODUCTION_DOMAIN` - Custom domain for CORS (auto-allows `*.vercel.app`)
 - `VERCEL_ENV` - Automatically set by Vercel (`production`, `preview`, `development`)
 
+### Important: Edge Runtime
+
+The API function uses **Edge Runtime** (`export const config = { runtime: "edge" }`) which is critical for performance. Without it, Node.js serverless functions have slow cold starts (5+ seconds) that can cause timeouts. Edge runtime has near-instant cold starts and runs closer to users.
+
+The function also includes a 25-second fetch timeout to prevent indefinite hangs when calling the Gamma API.
+
 ### Local vs Production
 
 | Environment | Frontend | Backend |
