@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { MarketsService } from '../markets.service';
 import { server } from '@/test/mocks/server';
-import { mockMarkets, mockMarket, mockMalformedMarket } from '@/test/mocks/data/markets';
+import { mockMarket, mockMalformedMarket } from '@/test/mocks/data/markets';
 
 describe('MarketsService', () => {
   describe('getMarkets', () => {
