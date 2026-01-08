@@ -86,8 +86,93 @@ Market data from Gamma API includes `outcomes` and `outcomePrices` as JSON strin
 3. Add route files in `frontend/src/routes/`
 4. Backend: Add handler in `backend/src/routes/polymarket.ts`, implement Gamma call in `polymarket-client.ts`
 
+## Testing
+
+The project uses **Vitest** for both frontend and backend testing with comprehensive coverage.
+
+### Test Commands
+
+**Backend (`cd backend`):**
+```bash
+npm test              # Run all tests (unit + integration)
+npm run test:unit     # Run only unit tests (mocked)
+npm run test:integration  # Run only integration tests (real Gamma API)
+npm run test:coverage # Run with coverage report
+```
+
+**Frontend (`cd frontend`):**
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode for development
+npm run test:coverage # Run with coverage report
+```
+
+### Test Structure
+
+**Backend tests:**
+- `src/lib/__tests__/polymarket-client.test.ts` - Gamma API client unit tests
+- `src/lib/__tests__/polymarket-client.integration.test.ts` - Real API integration tests
+- `src/routes/__tests__/polymarket.test.ts` - Route handler tests
+- `src/__tests__/app.test.ts` - App configuration tests (health, CORS, 404)
+
+**Frontend tests:**
+- `src/lib/__tests__/utils.test.ts` - Utility function tests
+- `src/features/markets/api/__tests__/markets.service.test.ts` - Service layer tests
+- `src/features/markets/api/__tests__/markets.queries.test.tsx` - React Query hook tests
+- `src/shared/hooks/__tests__/useMediaQuery.test.ts` - Media query hook tests
+
+**Frontend test infrastructure:**
+- `src/test/setup.ts` - Global test setup with jest-dom and MSW
+- `src/test/mocks/server.ts` - MSW server configuration
+- `src/test/mocks/handlers.ts` - API mock handlers
+- `src/test/mocks/data/markets.ts` - Mock data fixtures
+
+### Diagnosing Issues
+
+If tests pass locally but production fails, the issue is likely deployment-related (Vercel config, environment variables, cold starts).
+
+## Vercel Deployment
+
+The project is configured for Vercel with a serverless API function.
+
+### Deployment Architecture
+
+```
+Vercel
+├── /api/index.ts      → Serverless function (HonoJS)
+├── frontend/dist/     → Static frontend build
+└── vercel.json        → Deployment config
+```
+
+### Key Files
+
+- **Serverless function**: `/api/index.ts` - Self-contained Hono app with Gamma API client
+- **Vercel config**: `/vercel.json` - Build commands, output directory, API rewrites
+- **Root package.json**: `/package.json` - Dependencies for the serverless function
+
+### How It Works
+
+1. Frontend is built from `frontend/` and served as static files
+2. API requests to `/api/*` are rewritten to the serverless function
+3. The serverless function proxies requests to Gamma API with CORS handling
+
+### Environment Variables (Optional)
+
+- `PRODUCTION_DOMAIN` - Custom domain for CORS (auto-allows `*.vercel.app`)
+- `VERCEL_ENV` - Automatically set by Vercel (`production`, `preview`, `development`)
+
+### Local vs Production
+
+| Environment | Frontend | Backend |
+|-------------|----------|---------|
+| Local dev | Vite dev server (5173) | Node.js (3001) |
+| Vercel | Static files | Serverless function |
+
+The frontend API client uses relative URLs (`/api/*`) which work in both environments.
+
 ## Configuration
 
 - **Vite config**: `frontend/vite.config.ts` (proxy, plugins, aliases)
+- **Vitest config**: `backend/vitest.config.ts`, `frontend/vitest.config.ts`
 - **shadcn config**: `frontend/components.json`
 - **React Query stale time**: 5 minutes (defined in `frontend/src/shared/constants.ts`)
