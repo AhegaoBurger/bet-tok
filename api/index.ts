@@ -1,10 +1,15 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 
-// Gamma API client (inlined from backend/src/lib/polymarket-client.ts)
+// Vercel Edge Runtime config
+export const config = {
+  runtime: "edge",
+};
+
+// Gamma API client
 const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+const FETCH_TIMEOUT = 25000; // 25 second timeout
 
 async function fetchGamma<T>(
   endpoint: string,
@@ -17,22 +22,42 @@ async function fetchGamma<T>(
     });
   }
 
-  const response = await fetch(url.toString(), {
-    headers: { Accept: "application/json" },
-  });
+  console.log(`[fetchGamma] Fetching: ${url.toString()}`);
 
-  if (!response.ok) {
-    throw new Error(`Gamma API error: ${response.status} ${response.statusText}`);
+  // Add timeout using AbortController
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+  try {
+    const response = await fetch(url.toString(), {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Gamma API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log(`[fetchGamma] Success: ${endpoint}`);
+    return data as T;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`Gamma API timeout after ${FETCH_TIMEOUT}ms`);
+    }
+    throw error;
   }
-
-  return response.json() as Promise<T>;
 }
 
 // Create Hono app with /api base path
 const app = new Hono().basePath("/api");
 
-// Middleware
-app.use("*", logger());
+console.log("[api] Hono app initialized");
+
+// CORS Middleware
 app.use(
   "*",
   cors({
@@ -69,8 +94,10 @@ app.get("/health", (c) =>
 
 // GET /api/markets - List markets
 app.get("/markets", async (c) => {
+  console.log("[api/markets] Request received");
   try {
     const { limit, offset, active, closed, order, ascending } = c.req.query();
+    console.log("[api/markets] Params:", { limit, offset, active, closed });
     const markets = await fetchGamma("/markets", {
       limit,
       offset,
@@ -79,9 +106,10 @@ app.get("/markets", async (c) => {
       order,
       ascending,
     });
+    console.log("[api/markets] Returning", Array.isArray(markets) ? markets.length : 0, "markets");
     return c.json({ data: markets });
   } catch (error) {
-    console.error("Error fetching markets:", error);
+    console.error("[api/markets] Error:", error);
     return c.json({ error: "Failed to fetch markets" }, 500);
   }
 });
