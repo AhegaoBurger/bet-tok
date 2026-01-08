@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { EventsService } from "../events.service";
 import { server } from "@/test/mocks/server";
-import { mockEvent, mockMalformedEvent } from "@/test/mocks/data/events";
+import { mockMalformedEvent } from "@/test/mocks/data/events";
 
 describe("EventsService", () => {
   describe("getEvents", () => {
