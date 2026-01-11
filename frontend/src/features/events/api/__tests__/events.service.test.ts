@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { EventsService } from "../events.service";
 import { server } from "@/test/mocks/server";
-import { mockMalformedEvent } from "@/test/mocks/data/events";
+import { mockMalformedEvent, mockExpiredEvent, mockEvent } from "@/test/mocks/data/events";
 
 describe("EventsService", () => {
   describe("getEvents", () => {
@@ -97,6 +97,42 @@ describe("EventsService", () => {
       );
 
       await expect(EventsService.getEvents()).rejects.toThrow();
+    });
+
+    it("should filter out events with past endDate", async () => {
+      server.use(
+        http.get("/api/events", () => {
+          return HttpResponse.json({
+            data: [mockEvent, mockExpiredEvent],
+          });
+        })
+      );
+
+      const events = await EventsService.getEvents();
+
+      // Should only include future events
+      expect(events.length).toBe(1);
+      expect(events[0].id).toBe(mockEvent.id);
+
+      // Should not include expired event
+      const expiredEvent = events.find(e => e.id === mockExpiredEvent.id);
+      expect(expiredEvent).toBeUndefined();
+    });
+
+    it("should pass closed parameter to API", async () => {
+      let capturedClosed: string | null = null;
+
+      server.use(
+        http.get("/api/events", ({ request }) => {
+          const url = new URL(request.url);
+          capturedClosed = url.searchParams.get("closed");
+          return HttpResponse.json({ data: [] });
+        })
+      );
+
+      await EventsService.getEvents({ closed: false });
+
+      expect(capturedClosed).toBe("false");
     });
   });
 

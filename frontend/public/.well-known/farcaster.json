@@ -1,0 +1,20 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "bet-tok",
+    "homeUrl": "https://bet-tok.vercel.app",
+    "iconUrl": "https://bet-tok.vercel.app/icon.png",
+    "splashImageUrl": "https://bet-tok.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "subtitle": "Prediction Market Explorer",
+    "description": "Explore prediction markets from Polymarket",
+    "primaryCategory": "social",
+    "tags": ["predictions", "markets", "polymarket"],
+    "noindex": false
+  }
+}

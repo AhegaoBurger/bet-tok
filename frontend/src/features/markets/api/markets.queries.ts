@@ -11,6 +11,7 @@ export const marketKeys = {
     limit?: number;
     offset?: number;
     active?: boolean;
+    closed?: boolean;
     order?: MarketSortField;
     ascending?: boolean;
   }) => [...marketKeys.lists(), filters] as const,
@@ -18,6 +19,7 @@ export const marketKeys = {
     order?: MarketSortField;
     ascending?: boolean;
     active?: boolean;
+    closed?: boolean;
   }) => [...marketKeys.all, "infinite", filters] as const,
   details: () => [...marketKeys.all, "detail"] as const,
   detail: (id: string) => [...marketKeys.details(), id] as const,
@@ -28,6 +30,7 @@ export interface UseMarketsOptions {
   limit?: number;
   offset?: number;
   active?: boolean;
+  closed?: boolean;
   order?: MarketSortField;
   ascending?: boolean;
   enabled?: boolean;
@@ -38,15 +41,16 @@ export function useMarkets(options?: UseMarketsOptions) {
     limit = 20,
     offset = 0,
     active = true,
+    closed = false,
     order,
     ascending,
     enabled = true,
   } = options || {};
 
   return useQuery({
-    queryKey: marketKeys.list({ limit, offset, active, order, ascending }),
+    queryKey: marketKeys.list({ limit, offset, active, closed, order, ascending }),
     queryFn: () =>
-      MarketsService.getMarkets({ limit, offset, active, order, ascending }),
+      MarketsService.getMarkets({ limit, offset, active, closed, order, ascending }),
     staleTime: QUERY_STALE_TIME,
     enabled,
   });
@@ -55,6 +59,7 @@ export function useMarkets(options?: UseMarketsOptions) {
 export interface UseInfiniteMarketsOptions {
   pageSize?: number;
   active?: boolean;
+  closed?: boolean;
   order?: MarketSortField;
   ascending?: boolean;
   enabled?: boolean;
@@ -64,18 +69,20 @@ export function useInfiniteMarkets(options?: UseInfiniteMarketsOptions) {
   const {
     pageSize = 30,
     active = true,
+    closed = false,
     order = "volume",
     ascending = false,
     enabled = true,
   } = options || {};
 
   return useInfiniteQuery({
-    queryKey: marketKeys.infinite({ order, ascending, active }),
+    queryKey: marketKeys.infinite({ order, ascending, active, closed }),
     queryFn: ({ pageParam = 0 }) =>
       MarketsService.getMarkets({
         limit: pageSize,
         offset: pageParam,
         active,
+        closed,
         order,
         ascending,
       }),

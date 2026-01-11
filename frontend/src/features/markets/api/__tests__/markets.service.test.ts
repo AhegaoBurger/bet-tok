@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { MarketsService } from '../markets.service';
 import { server } from '@/test/mocks/server';
-import { mockMarket, mockMalformedMarket } from '@/test/mocks/data/markets';
+import { mockMarket, mockMalformedMarket, mockExpiredMarket } from '@/test/mocks/data/markets';
 
 describe('MarketsService', () => {
   describe('getMarkets', () => {
@@ -80,6 +80,42 @@ describe('MarketsService', () => {
       );
 
       await expect(MarketsService.getMarkets()).rejects.toThrow();
+    });
+
+    it('should filter out markets with past endDate', async () => {
+      server.use(
+        http.get('/api/markets', () => {
+          return HttpResponse.json({
+            data: [mockMarket, mockExpiredMarket],
+          });
+        })
+      );
+
+      const markets = await MarketsService.getMarkets();
+
+      // Should only include future markets
+      expect(markets.length).toBe(1);
+      expect(markets[0].id).toBe(mockMarket.id);
+
+      // Should not include expired market
+      const expiredMarket = markets.find(m => m.id === mockExpiredMarket.id);
+      expect(expiredMarket).toBeUndefined();
+    });
+
+    it('should pass closed parameter to API', async () => {
+      let capturedClosed: string | null = null;
+
+      server.use(
+        http.get('/api/markets', ({ request }) => {
+          const url = new URL(request.url);
+          capturedClosed = url.searchParams.get('closed');
+          return HttpResponse.json({ data: [] });
+        })
+      );
+
+      await MarketsService.getMarkets({ closed: false });
+
+      expect(capturedClosed).toBe('false');
     });
   });
 

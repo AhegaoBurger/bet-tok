@@ -27,6 +27,7 @@ export const MarketsService = {
     limit?: number;
     offset?: number;
     active?: boolean;
+    closed?: boolean;
     order?: string;
     ascending?: boolean;
   }): Promise<ParsedMarket[]> {
@@ -35,12 +36,16 @@ export const MarketsService = {
         limit: params?.limit?.toString(),
         offset: params?.offset?.toString(),
         active: params?.active?.toString(),
+        closed: params?.closed?.toString(),
         order: params?.order,
         ascending: params?.ascending?.toString(),
       },
     });
 
-    return response.data.data.map(parseMarketOutcomes);
+    const now = new Date();
+    return response.data.data
+      .map(parseMarketOutcomes)
+      .filter((market) => new Date(market.endDate) > now);
   },
 
   async getMarket(id: string): Promise<ParsedMarket> {

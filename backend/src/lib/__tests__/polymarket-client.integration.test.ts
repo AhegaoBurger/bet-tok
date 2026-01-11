@@ -38,6 +38,46 @@ describe('polymarketClient (Integration)', () => {
       const markets = await polymarketClient.getMarkets({ limit: '3' });
       expect(markets.length).toBeLessThanOrEqual(3);
     });
+
+    it('should filter by closed status', async () => {
+      const openMarkets = await polymarketClient.getMarkets({
+        limit: '5',
+        closed: 'false',
+      });
+
+      expect(Array.isArray(openMarkets)).toBe(true);
+      openMarkets.forEach((market) => {
+        expect(market.closed).toBe(false);
+      });
+    });
+
+    it('should return markets that may include past endDates (Gamma API limitation)', async () => {
+      // NOTE: This test documents that Gamma API's active/closed filters are unreliable.
+      // Markets with past endDates can still be returned even with active=true, closed=false.
+      // This is why we apply client-side endDate filtering in the frontend service layer.
+      const markets = await polymarketClient.getMarkets({
+        limit: '10',
+        active: 'true',
+        closed: 'false',
+      });
+
+      const now = new Date();
+      const pastEndDateMarkets = markets.filter((market) => {
+        if (market.endDate && market.endDate !== '') {
+          return new Date(market.endDate) < now;
+        }
+        return false;
+      });
+
+      // Document that past endDate markets may exist (Gamma API limitation)
+      // Our frontend service layer filters these out
+      if (pastEndDateMarkets.length > 0) {
+        console.log(`Found ${pastEndDateMarkets.length} markets with past endDates (expected Gamma API behavior)`);
+      }
+
+      // Test passes regardless - we're just verifying the API call works
+      expect(Array.isArray(markets)).toBe(true);
+    });
   });
 
   describe('searchMarkets', () => {
@@ -69,6 +109,46 @@ describe('polymarketClient (Integration)', () => {
         expect(event).toHaveProperty('id');
         expect(event).toHaveProperty('title');
       }
+    });
+
+    it('should filter events by closed status', async () => {
+      const openEvents = await polymarketClient.getEvents({
+        limit: '5',
+        closed: 'false',
+      });
+
+      expect(Array.isArray(openEvents)).toBe(true);
+      openEvents.forEach((event) => {
+        expect(event.closed).toBe(false);
+      });
+    });
+
+    it('should return events that may include past endDates (Gamma API limitation)', async () => {
+      // NOTE: This test documents that Gamma API's active/closed filters are unreliable.
+      // Events with past endDates can still be returned even with active=true, closed=false.
+      // This is why we apply client-side endDate filtering in the frontend service layer.
+      const events = await polymarketClient.getEvents({
+        limit: '10',
+        active: 'true',
+        closed: 'false',
+      });
+
+      const now = new Date();
+      const pastEndDateEvents = events.filter((event) => {
+        if (event.endDate && event.endDate !== '') {
+          return new Date(event.endDate) < now;
+        }
+        return false;
+      });
+
+      // Document that past endDate events may exist (Gamma API limitation)
+      // Our frontend service layer filters these out
+      if (pastEndDateEvents.length > 0) {
+        console.log(`Found ${pastEndDateEvents.length} events with past endDates (expected Gamma API behavior)`);
+      }
+
+      // Test passes regardless - we're just verifying the API call works
+      expect(Array.isArray(events)).toBe(true);
     });
   });
 

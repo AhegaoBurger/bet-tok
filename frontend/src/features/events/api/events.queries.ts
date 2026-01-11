@@ -10,6 +10,7 @@ export const eventKeys = {
     limit?: number;
     offset?: number;
     active?: boolean;
+    closed?: boolean;
     order?: EventSortField;
     ascending?: boolean;
   }) => [...eventKeys.lists(), filters] as const,
@@ -17,6 +18,7 @@ export const eventKeys = {
     order?: EventSortField;
     ascending?: boolean;
     active?: boolean;
+    closed?: boolean;
   }) => [...eventKeys.all, "infinite", filters] as const,
   details: () => [...eventKeys.all, "detail"] as const,
   detail: (id: string) => [...eventKeys.details(), id] as const,
@@ -25,6 +27,7 @@ export const eventKeys = {
 export interface UseInfiniteEventsOptions {
   pageSize?: number;
   active?: boolean;
+  closed?: boolean;
   order?: EventSortField;
   ascending?: boolean;
   enabled?: boolean;
@@ -34,18 +37,20 @@ export function useInfiniteEvents(options?: UseInfiniteEventsOptions) {
   const {
     pageSize = 20,
     active = true,
+    closed = false,
     order = "volume",
     ascending = false,
     enabled = true,
   } = options || {};
 
   return useInfiniteQuery({
-    queryKey: eventKeys.infinite({ order, ascending, active }),
+    queryKey: eventKeys.infinite({ order, ascending, active, closed }),
     queryFn: ({ pageParam = 0 }) =>
       EventsService.getEvents({
         limit: pageSize,
         offset: pageParam,
         active,
+        closed,
         order,
         ascending,
       }),
