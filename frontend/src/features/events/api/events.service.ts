@@ -36,19 +36,31 @@ function parseMarketOutcomes(market: Market): ParsedMarket {
 function parseEvent(event: Event): ParsedEvent {
   const parsedMarkets = event.markets.map(parseMarketOutcomes);
 
-  // Collect all outcomes from all markets, filtering out "No" outcomes
+  // Collect all outcomes from all markets
   const allOutcomes: EventOutcome[] = [];
   parsedMarkets.forEach((market) => {
-    market.parsedOutcomes.forEach((outcome) => {
-      // Skip "No" outcomes for cleaner display
-      if (outcome.name.toLowerCase() === "no") return;
-
+    // For multi-outcome events, use groupItemTitle as the outcome name
+    // and get the "Yes" price (index 0)
+    if (market.groupItemTitle) {
+      const yesPrice = market.parsedOutcomes[0]?.price ?? 0;
       allOutcomes.push({
-        name: outcome.name,
-        price: outcome.price,
+        name: market.groupItemTitle,
+        price: yesPrice,
         marketId: market.id,
       });
-    });
+    } else {
+      // For simple binary markets, use the original behavior
+      market.parsedOutcomes.forEach((outcome) => {
+        // Skip "No" outcomes for cleaner display
+        if (outcome.name.toLowerCase() === "no") return;
+
+        allOutcomes.push({
+          name: outcome.name,
+          price: outcome.price,
+          marketId: market.id,
+        });
+      });
+    }
   });
 
   // Sort by probability descending

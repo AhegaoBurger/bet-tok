@@ -23,6 +23,11 @@ export interface Market {
   submitted_by: string;
   category: string;
   volume24hr: string;
+  // Multi-outcome event fields
+  groupItemTitle?: string;
+  groupItemThreshold?: string;
+  negRisk?: boolean;
+  negRiskMarketID?: string;
 }
 
 export interface MarketOutcome {

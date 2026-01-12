@@ -4,9 +4,11 @@ import type { QueryClient } from "@tanstack/react-query";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { useEffect } from "react";
+import type { RouterAuthContext } from "@/features/auth/types/auth.types";
 
 export interface RouterContext {
   queryClient: QueryClient;
+  auth: RouterAuthContext;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({

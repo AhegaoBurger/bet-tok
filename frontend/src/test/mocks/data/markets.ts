@@ -64,3 +64,37 @@ export const mockMalformedMarket: Market = {
   outcomes: 'not-valid-json',
   outcomePrices: 'also-not-valid',
 };
+
+// Multi-outcome market mock (e.g., for presidential elections, Fed decisions)
+export const mockMultiOutcomeMarkets: Market[] = [
+  {
+    ...mockMarket,
+    id: 'multi-outcome-1',
+    question: 'Will Donald Trump win the 2028 US Presidential Election?',
+    slug: 'trump-2028',
+    outcomes: '["Yes","No"]',
+    outcomePrices: '["0.45","0.55"]',
+    groupItemTitle: 'Donald Trump',
+    negRisk: true,
+  },
+  {
+    ...mockMarket,
+    id: 'multi-outcome-2',
+    question: 'Will Kamala Harris win the 2028 US Presidential Election?',
+    slug: 'harris-2028',
+    outcomes: '["Yes","No"]',
+    outcomePrices: '["0.35","0.65"]',
+    groupItemTitle: 'Kamala Harris',
+    negRisk: true,
+  },
+  {
+    ...mockMarket,
+    id: 'multi-outcome-3',
+    question: 'Will Ron DeSantis win the 2028 US Presidential Election?',
+    slug: 'desantis-2028',
+    outcomes: '["Yes","No"]',
+    outcomePrices: '["0.15","0.85"]',
+    groupItemTitle: 'Ron DeSantis',
+    negRisk: true,
+  },
+];

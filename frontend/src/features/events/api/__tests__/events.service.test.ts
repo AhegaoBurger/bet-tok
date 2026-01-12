@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { EventsService } from "../events.service";
 import { server } from "@/test/mocks/server";
-import { mockMalformedEvent, mockExpiredEvent, mockEvent } from "@/test/mocks/data/events";
+import { mockMalformedEvent, mockExpiredEvent, mockEvent, mockMultiOutcomeEvent } from "@/test/mocks/data/events";
 
 describe("EventsService", () => {
   describe("getEvents", () => {
@@ -133,6 +133,49 @@ describe("EventsService", () => {
       await EventsService.getEvents({ closed: false });
 
       expect(capturedClosed).toBe("false");
+    });
+
+    it("should use groupItemTitle for multi-outcome event names", async () => {
+      server.use(
+        http.get("/api/events", () => {
+          return HttpResponse.json({
+            data: [mockMultiOutcomeEvent],
+          });
+        })
+      );
+
+      const events = await EventsService.getEvents();
+      const event = events[0];
+
+      // Should use groupItemTitle as outcome name instead of "Yes"
+      const outcomeNames = event.topOutcomes.map((o) => o.name);
+      expect(outcomeNames).toContain("Donald Trump");
+      expect(outcomeNames).toContain("Kamala Harris");
+      expect(outcomeNames).toContain("Ron DeSantis");
+
+      // Should NOT contain "Yes" as an outcome name
+      expect(outcomeNames).not.toContain("Yes");
+    });
+
+    it("should sort multi-outcome events by probability descending", async () => {
+      server.use(
+        http.get("/api/events", () => {
+          return HttpResponse.json({
+            data: [mockMultiOutcomeEvent],
+          });
+        })
+      );
+
+      const events = await EventsService.getEvents();
+      const event = events[0];
+
+      // Verify sorting: Trump (0.45) > Harris (0.35) > DeSantis (0.15)
+      expect(event.topOutcomes[0].name).toBe("Donald Trump");
+      expect(event.topOutcomes[0].price).toBe(0.45);
+      expect(event.topOutcomes[1].name).toBe("Kamala Harris");
+      expect(event.topOutcomes[1].price).toBe(0.35);
+      expect(event.topOutcomes[2].name).toBe("Ron DeSantis");
+      expect(event.topOutcomes[2].price).toBe(0.15);
     });
   });
 

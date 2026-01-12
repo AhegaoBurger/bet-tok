@@ -1,5 +1,5 @@
 import type { Event } from "@/features/events/types/event.types";
-import { mockMarket, mockMarkets } from "./markets";
+import { mockMarket, mockMarkets, mockMultiOutcomeMarkets } from "./markets";
 
 export const mockEvent: Event = {
   id: "test-event-1",
@@ -68,4 +68,14 @@ export const mockMalformedEvent: Event = {
       outcomePrices: "also-not-valid",
     },
   ],
+};
+
+// Multi-outcome event mock (uses groupItemTitle for outcome names)
+export const mockMultiOutcomeEvent: Event = {
+  ...mockEvent,
+  id: "multi-outcome-event-1",
+  title: "Presidential Election Winner 2028",
+  slug: "presidential-election-2028",
+  description: "Who will win the 2028 US Presidential Election?",
+  markets: mockMultiOutcomeMarkets,
 };

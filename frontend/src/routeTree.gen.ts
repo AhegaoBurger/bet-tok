@@ -9,16 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ApiExplorerRouteImport } from './routes/api-explorer'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketsIndexRouteImport } from './routes/markets/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets/$marketId'
 import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiExplorerRoute = ApiExplorerRouteImport.update({
+  id: '/api-explorer',
+  path: '/api-explorer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,10 +64,18 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/api-explorer': typeof ApiExplorerRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/events': typeof EventsIndexRoute
@@ -58,6 +84,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/api-explorer': typeof ApiExplorerRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/events': typeof EventsIndexRoute
@@ -66,7 +95,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
+  '/api-explorer': typeof ApiExplorerRoute
+  '/login': typeof LoginRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/events/': typeof EventsIndexRoute
@@ -77,6 +110,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/api-explorer'
+    | '/login'
+    | '/profile'
     | '/events/$eventId'
     | '/markets/$marketId'
     | '/events'
@@ -85,6 +121,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/api-explorer'
+    | '/login'
+    | '/profile'
     | '/events/$eventId'
     | '/markets/$marketId'
     | '/events'
@@ -92,7 +131,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/about'
+    | '/api-explorer'
+    | '/login'
+    | '/_authenticated/profile'
     | '/events/$eventId'
     | '/markets/$marketId'
     | '/events/'
@@ -101,7 +144,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
+  ApiExplorerRoute: typeof ApiExplorerRoute
+  LoginRoute: typeof LoginRoute
   EventsEventIdRoute: typeof EventsEventIdRoute
   MarketsMarketIdRoute: typeof MarketsMarketIdRoute
   EventsIndexRoute: typeof EventsIndexRoute
@@ -110,11 +156,32 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api-explorer': {
+      id: '/api-explorer'
+      path: '/api-explorer'
+      fullPath: '/api-explorer'
+      preLoaderRoute: typeof ApiExplorerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -152,12 +219,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
+  ApiExplorerRoute: ApiExplorerRoute,
+  LoginRoute: LoginRoute,
   EventsEventIdRoute: EventsEventIdRoute,
   MarketsMarketIdRoute: MarketsMarketIdRoute,
   EventsIndexRoute: EventsIndexRoute,
