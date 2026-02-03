@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
+import { PlatformBadge } from "@/shared/components/PlatformBadge";
 import type { ParsedEvent } from "../types/event.types";
 
 interface EventCardProps {
@@ -70,7 +71,8 @@ export function EventCard({ event, maxOutcomes = 4 }: EventCardProps) {
           )}
 
           {/* Status badges */}
-          <div className="flex gap-2 pt-2 border-t">
+          <div className="flex flex-wrap gap-2 pt-2 border-t">
+            <PlatformBadge platform={event.platform} />
             {event.active && (
               <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 Active

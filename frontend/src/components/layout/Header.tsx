@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, User, Wallet } from "lucide-react";
+import { Menu, X, User, Wallet, Settings } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/shared/hooks/useMediaQuery";
@@ -47,13 +47,22 @@ export function Header() {
 
             {/* Auth Button */}
             {isConnected ? (
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:text-foreground"
-              >
-                <User className="h-4 w-4" />
-                {shortenAddress(address)}
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/settings"
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:text-foreground"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground [&.active]:text-foreground"
+                >
+                  <User className="h-4 w-4" />
+                  {shortenAddress(address)}
+                </Link>
+              </div>
             ) : (
               <Button size="sm" onClick={connect}>
                 <Wallet className="h-4 w-4 mr-2" />
@@ -96,14 +105,24 @@ export function Header() {
 
             {/* Mobile Auth */}
             {isConnected ? (
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <User className="h-4 w-4" />
-                Profile ({shortenAddress(address)})
-              </Link>
+              <>
+                <Link
+                  to="/settings"
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  Profile ({shortenAddress(address)})
+                </Link>
+              </>
             ) : (
               <Button size="sm" onClick={connect} className="w-full">
                 <Wallet className="h-4 w-4 mr-2" />

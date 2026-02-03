@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
+import { PlatformBadge } from "@/shared/components/PlatformBadge";
 import type { ParsedMarket } from "../types/market.types";
 
 interface MarketCardProps {
@@ -50,7 +51,8 @@ export function MarketCard({ market }: MarketCardProps) {
           </div>
 
           {/* Status badges */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <PlatformBadge platform={market.platform} />
             {market.active && (
               <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 Active

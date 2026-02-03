@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
 import { ArrowLeft, ExternalLink, Calendar, DollarSign, Droplets } from "lucide-react";
+import { PlatformBadge } from "@/shared/components/PlatformBadge";
+import { TradePlatformLink } from "@/shared/components/TradePlatformLink";
 
 export function MarketDetailPage() {
   const { marketId } = useParams({ from: "/markets/$marketId" });
@@ -53,9 +55,10 @@ export function MarketDetailPage() {
             className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
           />
         )}
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1">
           <h1 className="text-2xl lg:text-3xl font-bold">{market.question}</h1>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <PlatformBadge platform={market.platform} />
             {market.active && (
               <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 Active
@@ -72,6 +75,10 @@ export function MarketDetailPage() {
               </span>
             )}
           </div>
+          <TradePlatformLink
+            platform={market.platform}
+            platformUrl={market.platformUrl}
+          />
         </div>
       </div>
 

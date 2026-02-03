@@ -20,6 +20,8 @@ export const mockEvent: Event = {
   liquidity: 5000000,
   volume: 15000000,
   markets: mockMarkets,
+  platform: "polymarket",
+  platformUrl: "https://polymarket.com/event/us-presidential-election-2028",
 };
 
 export const mockEvents: Event[] = [
@@ -79,3 +81,41 @@ export const mockMultiOutcomeEvent: Event = {
   description: "Who will win the 2028 US Presidential Election?",
   markets: mockMultiOutcomeMarkets,
 };
+
+// Kalshi mock event
+export const mockKalshiEvent: Event = {
+  id: "KXELONMARS-99",
+  title: "Will Elon Musk visit Mars in his lifetime?",
+  slug: "kxelonmars-99",
+  description: "Before 2099",
+  startDate: "2025-08-28T20:45:00Z",
+  creationDate: "2025-08-28T20:45:00Z",
+  endDate: "2099-08-01T04:59:00Z",
+  image: "",
+  icon: "",
+  active: true,
+  closed: false,
+  archived: false,
+  new: false,
+  featured: false,
+  restricted: false,
+  liquidity: 56430,
+  volume: 36862,
+  markets: [],
+  platform: "kalshi",
+  platformUrl: "https://kalshi.com/events/KXELONMARS-99",
+};
+
+export const mockKalshiEvents: Event[] = [
+  mockKalshiEvent,
+  {
+    ...mockKalshiEvent,
+    id: "KXWARMING-50",
+    title: "Will the world pass 2 degrees Celsius over pre-industrial levels before 2050?",
+    slug: "kxwarming-50",
+    description: "Before 2050",
+    volume: 10000,
+    liquidity: 25000,
+    platformUrl: "https://kalshi.com/events/KXWARMING-50",
+  },
+];

@@ -25,6 +25,8 @@ export const mockMarket: Market = {
   submitted_by: 'admin',
   category: 'crypto',
   volume24hr: '50000',
+  platform: 'polymarket',
+  platformUrl: 'https://polymarket.com/market/bitcoin-200k-2027',
 };
 
 export const mockMarkets: Market[] = [
@@ -96,5 +98,47 @@ export const mockMultiOutcomeMarkets: Market[] = [
     outcomePrices: '["0.15","0.85"]',
     groupItemTitle: 'Ron DeSantis',
     negRisk: true,
+  },
+];
+
+// Kalshi mock market
+export const mockKalshiMarket: Market = {
+  id: 'KXELONMARS-99',
+  ticker: 'KXELONMARS-99',
+  question: 'Will Elon Musk visit Mars before Aug 1, 2099?',
+  slug: 'kxelonmars-99',
+  resolutionSource: 'https://kalshi.com',
+  endDate: '2099-08-01T04:59:00Z',
+  liquidity: '56430',
+  startDate: '2025-08-28T20:45:00Z',
+  image: '',
+  icon: '',
+  description: 'If Elon Musk visits Mars before the earlier of his death or Aug 1, 2099, then the market resolves to Yes.',
+  outcomes: '["Yes","No"]',
+  outcomePrices: '["0.07","0.93"]',
+  volume: '36862',
+  active: true,
+  closed: false,
+  createdAt: '2025-08-28T20:45:00Z',
+  updatedAt: '2025-08-28T20:45:00Z',
+  new: false,
+  featured: false,
+  category: 'World',
+  volume24hr: '214',
+  platform: 'kalshi',
+  platformUrl: 'https://kalshi.com/markets/KXELONMARS-99',
+};
+
+export const mockKalshiMarkets: Market[] = [
+  mockKalshiMarket,
+  {
+    ...mockKalshiMarket,
+    id: 'KXWARMING-50',
+    ticker: 'KXWARMING-50',
+    question: 'Will the world pass 2 degrees Celsius over pre-industrial levels before 2050?',
+    slug: 'kxwarming-50',
+    category: 'Climate and Weather',
+    outcomePrices: '["0.25","0.75"]',
+    platformUrl: 'https://kalshi.com/markets/KXWARMING-50',
   },
 ];

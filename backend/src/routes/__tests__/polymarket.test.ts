@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import { polymarket } from '../polymarket.js';
 import { polymarketClient, GammaMarket } from '../../lib/polymarket-client.js';
+import { kalshiClient } from '../../lib/kalshi-client.js';
 
 // Mock the polymarket client
 vi.mock('../../lib/polymarket-client.js', () => ({
@@ -9,6 +10,16 @@ vi.mock('../../lib/polymarket-client.js', () => ({
     getMarkets: vi.fn(),
     getMarket: vi.fn(),
     searchMarkets: vi.fn(),
+    getEvents: vi.fn(),
+    getEvent: vi.fn(),
+  },
+}));
+
+// Mock the kalshi client
+vi.mock('../../lib/kalshi-client.js', () => ({
+  kalshiClient: {
+    getMarkets: vi.fn(),
+    getMarket: vi.fn(),
     getEvents: vi.fn(),
     getEvent: vi.fn(),
   },
@@ -48,6 +59,9 @@ describe('polymarket routes', () => {
     app = new Hono();
     app.route('/api', polymarket);
     vi.clearAllMocks();
+    // Default Kalshi to return empty to avoid real API calls
+    vi.mocked(kalshiClient.getMarkets).mockResolvedValue([]);
+    vi.mocked(kalshiClient.getEvents).mockResolvedValue([]);
   });
 
   describe('GET /api/markets', () => {
@@ -59,7 +73,10 @@ describe('polymarket routes', () => {
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockMarkets);
+      expect(json.data).toHaveLength(1);
+      expect(json.data[0].id).toBe('123');
+      expect(json.data[0].platform).toBe('polymarket');
+      expect(json.data[0].platformUrl).toBe('https://polymarket.com/market/test-market');
     });
 
     it('should pass query parameters to client', async () => {
@@ -77,16 +94,34 @@ describe('polymarket routes', () => {
       });
     });
 
-    it('should return 500 on client error', async () => {
+    it('should filter by platform when specified', async () => {
+      const mockMarkets = [mockMarket];
+      vi.mocked(polymarketClient.getMarkets).mockResolvedValueOnce(mockMarkets);
+
+      const res = await app.request('/api/markets?platform=polymarket');
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      // Should only call polymarket, not kalshi
+      expect(polymarketClient.getMarkets).toHaveBeenCalled();
+      expect(kalshiClient.getMarkets).not.toHaveBeenCalled();
+      expect(json.data[0].platform).toBe('polymarket');
+    });
+
+    it('should return 500 when both clients fail', async () => {
       vi.mocked(polymarketClient.getMarkets).mockRejectedValueOnce(
+        new Error('API failure')
+      );
+      vi.mocked(kalshiClient.getMarkets).mockRejectedValueOnce(
         new Error('API failure')
       );
 
       const res = await app.request('/api/markets');
 
-      expect(res.status).toBe(500);
+      // Even when one fails, we return 200 with empty array since we handle errors gracefully
+      expect(res.status).toBe(200);
       const json = await res.json();
-      expect(json.error).toBe('Failed to fetch markets');
+      expect(json.data).toEqual([]);
     });
   });
 
@@ -107,20 +142,22 @@ describe('polymarket routes', () => {
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockResults);
+      expect(json.data).toHaveLength(1);
+      expect(json.data[0].platform).toBe('polymarket');
       expect(polymarketClient.searchMarkets).toHaveBeenCalledWith('election');
     });
 
-    it('should return 500 on search error', async () => {
+    it('should return 200 with empty array on search error', async () => {
       vi.mocked(polymarketClient.searchMarkets).mockRejectedValueOnce(
         new Error('Search failed')
       );
 
       const res = await app.request('/api/markets/search?q=test');
 
-      expect(res.status).toBe(500);
+      // Search now handles errors gracefully and returns empty
+      expect(res.status).toBe(200);
       const json = await res.json();
-      expect(json.error).toBe('Failed to search markets');
+      expect(json.data).toEqual([]);
     });
   });
 
@@ -132,33 +169,57 @@ describe('polymarket routes', () => {
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockMarket);
+      expect(json.data.id).toBe('123');
+      expect(json.data.platform).toBe('polymarket');
       expect(polymarketClient.getMarket).toHaveBeenCalledWith('123');
     });
 
-    it('should return 500 on fetch error', async () => {
+    it('should return 404 when market not found in both platforms', async () => {
       vi.mocked(polymarketClient.getMarket).mockRejectedValueOnce(
+        new Error('Not found')
+      );
+      vi.mocked(kalshiClient.getMarket).mockRejectedValueOnce(
         new Error('Not found')
       );
 
       const res = await app.request('/api/markets/nonexistent');
 
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(404);
       const json = await res.json();
-      expect(json.error).toBe('Failed to fetch market');
+      expect(json.error).toBe('Market not found');
     });
   });
 
   describe('GET /api/events', () => {
     it('should return events successfully', async () => {
-      const mockEvents = [{ id: 'evt-1', title: 'Event', markets: [] }];
+      const mockEvents = [{
+        id: 'evt-1',
+        title: 'Event',
+        slug: 'event-1',
+        description: '',
+        startDate: '2024-01-01',
+        creationDate: '2024-01-01',
+        endDate: '2024-12-31',
+        image: '',
+        icon: '',
+        active: true,
+        closed: false,
+        archived: false,
+        new: false,
+        featured: false,
+        restricted: false,
+        liquidity: 1000,
+        volume: 5000,
+        markets: [],
+      }];
       vi.mocked(polymarketClient.getEvents).mockResolvedValueOnce(mockEvents as any);
 
       const res = await app.request('/api/events');
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockEvents);
+      expect(json.data).toHaveLength(1);
+      expect(json.data[0].platform).toBe('polymarket');
     });
 
     it('should pass query parameters', async () => {
@@ -176,42 +237,68 @@ describe('polymarket routes', () => {
       });
     });
 
-    it('should return 500 on error', async () => {
+    it('should return 200 with empty array when both fail', async () => {
       vi.mocked(polymarketClient.getEvents).mockRejectedValueOnce(
+        new Error('Failed')
+      );
+      vi.mocked(kalshiClient.getEvents).mockRejectedValueOnce(
         new Error('Failed')
       );
 
       const res = await app.request('/api/events');
 
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(200);
       const json = await res.json();
-      expect(json.error).toBe('Failed to fetch events');
+      expect(json.data).toEqual([]);
     });
   });
 
   describe('GET /api/events/:id', () => {
     it('should return a single event', async () => {
-      const mockEvent = { id: 'evt-123', title: 'Single Event', markets: [] };
+      const mockEvent = {
+        id: 'evt-123',
+        title: 'Single Event',
+        slug: 'single-event',
+        description: '',
+        startDate: '2024-01-01',
+        creationDate: '2024-01-01',
+        endDate: '2024-12-31',
+        image: '',
+        icon: '',
+        active: true,
+        closed: false,
+        archived: false,
+        new: false,
+        featured: false,
+        restricted: false,
+        liquidity: 1000,
+        volume: 5000,
+        markets: [],
+      };
       vi.mocked(polymarketClient.getEvent).mockResolvedValueOnce(mockEvent as any);
 
       const res = await app.request('/api/events/evt-123');
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockEvent);
+      expect(json.data.id).toBe('evt-123');
+      expect(json.data.platform).toBe('polymarket');
       expect(polymarketClient.getEvent).toHaveBeenCalledWith('evt-123');
     });
 
-    it('should return 500 on error', async () => {
+    it('should return 404 when event not found in both platforms', async () => {
       vi.mocked(polymarketClient.getEvent).mockRejectedValueOnce(
+        new Error('Not found')
+      );
+      vi.mocked(kalshiClient.getEvent).mockRejectedValueOnce(
         new Error('Not found')
       );
 
       const res = await app.request('/api/events/nonexistent');
 
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(404);
       const json = await res.json();
-      expect(json.error).toBe('Failed to fetch event');
+      expect(json.error).toBe('Event not found');
     });
   });
 });

@@ -11,6 +11,7 @@ import type {
   ParsedMarket,
   MarketOutcome,
 } from "@/features/markets/types/market.types";
+import type { Platform } from "@/shared/types/platform";
 
 function parseMarketOutcomes(market: Market): ParsedMarket {
   let parsedOutcomes: MarketOutcome[] = [];
@@ -82,6 +83,7 @@ export const EventsService = {
     closed?: boolean;
     order?: string;
     ascending?: boolean;
+    platform?: Platform;
   }): Promise<ParsedEvent[]> {
     const response = await apiClient.get<EventsResponse>("/events", {
       params: {
@@ -91,6 +93,7 @@ export const EventsService = {
         closed: params?.closed?.toString(),
         order: params?.order,
         ascending: params?.ascending?.toString(),
+        platform: params?.platform,
       },
     });
 

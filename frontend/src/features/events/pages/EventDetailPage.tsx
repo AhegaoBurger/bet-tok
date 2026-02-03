@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
 import { ArrowLeft, Calendar, DollarSign, Droplets } from "lucide-react";
+import { PlatformBadge } from "@/shared/components/PlatformBadge";
+import { TradePlatformLink } from "@/shared/components/TradePlatformLink";
 
 export function EventDetailPage() {
   const { eventId } = useParams({ from: "/events/$eventId" });
@@ -54,9 +56,10 @@ export function EventDetailPage() {
             className="w-24 h-24 rounded-xl object-cover flex-shrink-0"
           />
         )}
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1">
           <h1 className="text-2xl lg:text-3xl font-bold">{event.title}</h1>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <PlatformBadge platform={event.platform} />
             {event.active && (
               <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 Active
@@ -73,6 +76,10 @@ export function EventDetailPage() {
               </span>
             )}
           </div>
+          <TradePlatformLink
+            platform={event.platform}
+            platformUrl={event.platformUrl}
+          />
         </div>
       </div>
 

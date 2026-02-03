@@ -6,9 +6,16 @@ import { LoadMoreButton } from "../components/LoadMoreButton";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { DEFAULT_EVENT_SORT, type EventSortOption } from "../types/event.types";
+import {
+  PlatformFilter,
+  type PlatformFilterValue,
+} from "@/shared/components/PlatformFilter";
+import type { Platform } from "@/shared/types/platform";
 
 export function EventsPage() {
   const [sortOption, setSortOption] = useState<EventSortOption>(DEFAULT_EVENT_SORT);
+  const [platformFilter, setPlatformFilter] =
+    useState<PlatformFilterValue>("all");
 
   const {
     data,
@@ -23,12 +30,17 @@ export function EventsPage() {
     active: true,
     order: sortOption.value,
     ascending: sortOption.ascending,
+    platform: platformFilter === "all" ? undefined : (platformFilter as Platform),
   });
 
   const events = data?.pages.flat() ?? [];
 
   const handleSortChange = (option: EventSortOption) => {
     setSortOption(option);
+  };
+
+  const handlePlatformChange = (value: PlatformFilterValue) => {
+    setPlatformFilter(value);
   };
 
   const handleLoadMore = () => {
@@ -59,12 +71,13 @@ export function EventsPage() {
         </Button>
       </div>
 
-      {/* Sort Controls */}
-      <div className="flex items-center justify-between">
+      {/* Filter Controls */}
+      <div className="flex flex-wrap items-center gap-4">
         <EventSortDropdown value={sortOption} onChange={handleSortChange} />
+        <PlatformFilter value={platformFilter} onChange={handlePlatformChange} />
 
         {!isLoading && events.length > 0 && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground ml-auto">
             Showing {events.length} events
           </p>
         )}

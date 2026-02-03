@@ -18,6 +18,7 @@ import { Route as MarketsIndexRouteImport } from './routes/markets/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as MarketsMarketIdRouteImport } from './routes/markets/$marketId'
 import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
 const LoginRoute = LoginRouteImport.update({
@@ -64,6 +65,11 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/api-explorer': typeof ApiExplorerRoute
   '/login': typeof LoginRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/events': typeof EventsIndexRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/api-explorer': typeof ApiExplorerRoute
   '/login': typeof LoginRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/events': typeof EventsIndexRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/api-explorer': typeof ApiExplorerRoute
   '/login': typeof LoginRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/events/$eventId': typeof EventsEventIdRoute
   '/markets/$marketId': typeof MarketsMarketIdRoute
   '/events/': typeof EventsIndexRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/api-explorer'
     | '/login'
     | '/profile'
+    | '/settings'
     | '/events/$eventId'
     | '/markets/$marketId'
     | '/events'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/api-explorer'
     | '/login'
     | '/profile'
+    | '/settings'
     | '/events/$eventId'
     | '/markets/$marketId'
     | '/events'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/api-explorer'
     | '/login'
     | '/_authenticated/profile'
+    | '/_authenticated/settings'
     | '/events/$eventId'
     | '/markets/$marketId'
     | '/events/'
@@ -219,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -231,10 +250,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

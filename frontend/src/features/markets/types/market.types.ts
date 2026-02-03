@@ -1,7 +1,9 @@
+import type { Platform } from "@/shared/types/platform";
+
 export interface Market {
   id: string;
   question: string;
-  conditionId: string;
+  conditionId?: string;
   slug: string;
   resolutionSource: string;
   endDate: string;
@@ -15,19 +17,23 @@ export interface Market {
   volume: string;
   active: boolean;
   closed: boolean;
-  marketMakerAddress: string;
+  marketMakerAddress?: string;
   createdAt: string;
   updatedAt: string;
   new: boolean;
   featured: boolean;
-  submitted_by: string;
+  submitted_by?: string;
   category: string;
   volume24hr: string;
+  platform: Platform;
+  platformUrl: string;
   // Multi-outcome event fields
   groupItemTitle?: string;
   groupItemThreshold?: string;
   negRisk?: boolean;
   negRiskMarketID?: string;
+  // Kalshi-specific fields
+  ticker?: string;
 }
 
 export interface MarketOutcome {

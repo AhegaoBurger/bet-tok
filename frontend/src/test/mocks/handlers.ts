@@ -1,15 +1,24 @@
 import { http, HttpResponse } from "msw";
-import { mockMarkets, mockMarket } from "./data/markets";
-import { mockEvents, mockEvent } from "./data/events";
+import { mockMarkets, mockMarket, mockKalshiMarkets } from "./data/markets";
+import { mockEvents, mockEvent, mockKalshiEvents } from "./data/events";
 
 export const handlers = [
   // GET /api/markets
   http.get("/api/markets", ({ request }) => {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);
+    const platform = url.searchParams.get("platform");
+
+    let markets = [...mockMarkets, ...mockKalshiMarkets];
+
+    if (platform === "polymarket") {
+      markets = mockMarkets;
+    } else if (platform === "kalshi") {
+      markets = mockKalshiMarkets;
+    }
 
     return HttpResponse.json({
-      data: mockMarkets.slice(0, limit),
+      data: markets.slice(0, limit),
     });
   }),
 
@@ -48,18 +57,25 @@ export const handlers = [
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);
     const order = url.searchParams.get("order");
     const ascending = url.searchParams.get("ascending") === "true";
+    const platform = url.searchParams.get("platform");
 
-    let sortedEvents = [...mockEvents];
+    let events = [...mockEvents, ...mockKalshiEvents];
+
+    if (platform === "polymarket") {
+      events = [...mockEvents];
+    } else if (platform === "kalshi") {
+      events = [...mockKalshiEvents];
+    }
 
     // Sort by volume if requested
     if (order === "volume") {
-      sortedEvents.sort((a, b) =>
+      events.sort((a, b) =>
         ascending ? a.volume - b.volume : b.volume - a.volume
       );
     }
 
     return HttpResponse.json({
-      data: sortedEvents.slice(0, limit),
+      data: events.slice(0, limit),
     });
   }),
 

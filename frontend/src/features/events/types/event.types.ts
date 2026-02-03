@@ -1,4 +1,5 @@
 import type { Market, ParsedMarket } from "@/features/markets/types/market.types";
+import type { Platform } from "@/shared/types/platform";
 
 export interface Event {
   id: string;
@@ -19,6 +20,8 @@ export interface Event {
   liquidity: number;
   volume: number;
   markets: Market[];
+  platform: Platform;
+  platformUrl: string;
 }
 
 export interface EventOutcome {

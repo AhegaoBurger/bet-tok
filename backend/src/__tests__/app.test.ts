@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { polymarket } from '../routes/polymarket.js';
 import { polymarketClient } from '../lib/polymarket-client.js';
+import { kalshiClient } from '../lib/kalshi-client.js';
 
 // Mock the polymarket client for app-level tests
 vi.mock('../lib/polymarket-client.js', () => ({
@@ -11,6 +12,16 @@ vi.mock('../lib/polymarket-client.js', () => ({
     getMarkets: vi.fn(),
     getMarket: vi.fn(),
     searchMarkets: vi.fn(),
+    getEvents: vi.fn(),
+    getEvent: vi.fn(),
+  },
+}));
+
+// Mock the kalshi client
+vi.mock('../lib/kalshi-client.js', () => ({
+  kalshiClient: {
+    getMarkets: vi.fn(),
+    getMarket: vi.fn(),
     getEvents: vi.fn(),
     getEvent: vi.fn(),
   },
@@ -50,6 +61,9 @@ describe('Application', () => {
     });
 
     vi.clearAllMocks();
+    // Default Kalshi to return empty to avoid real API calls
+    vi.mocked(kalshiClient.getMarkets).mockResolvedValue([]);
+    vi.mocked(kalshiClient.getEvents).mockResolvedValue([]);
   });
 
   describe('Health Endpoint', () => {
@@ -108,25 +122,33 @@ describe('Application', () => {
 
   describe('API Integration', () => {
     it('should route /api/markets correctly', async () => {
-      const mockMarkets = [{ id: '1', question: 'Test?' }];
+      const mockMarkets = [{
+        id: '1',
+        question: 'Test?',
+        slug: 'test-market',
+        volume: '100',
+      }];
       vi.mocked(polymarketClient.getMarkets).mockResolvedValueOnce(mockMarkets as any);
 
       const res = await app.request('/api/markets');
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockMarkets);
+      expect(json.data).toHaveLength(1);
+      expect(json.data[0].id).toBe('1');
+      expect(json.data[0].platform).toBe('polymarket');
     });
 
     it('should route /api/markets/:id correctly', async () => {
-      const mockMarket = { id: 'abc', question: 'Test?' };
+      const mockMarket = { id: 'abc', question: 'Test?', slug: 'test-market' };
       vi.mocked(polymarketClient.getMarket).mockResolvedValueOnce(mockMarket as any);
 
       const res = await app.request('/api/markets/abc');
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.data).toEqual(mockMarket);
+      expect(json.data.id).toBe('abc');
+      expect(json.data.platform).toBe('polymarket');
     });
   });
 });
